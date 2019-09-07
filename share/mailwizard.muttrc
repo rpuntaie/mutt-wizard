@@ -54,8 +54,9 @@ bind pager,attach,browser,index g noop
 # Moving between views the vim way
 bind attach,index gg first-entry
 bind attach,index G last-entry
-bind pager,browser gg top-page
-bind pager,browser G bottom-page
+bind browser gg top-page
+bind browser G bottom-page
+bind pager gg top
 bind pager G bottom
 bind pager k previous-line
 bind pager j next-line
@@ -65,8 +66,8 @@ bind index l display-message
 bind browser l select-entry
 bind pager l view-attachments
 bind attach l view-mailcap
-bind attach <return> view-mailcap
 bind pager,attach h exit
+bind index,pager,attach <return> view-mailcap
 macro browser h '<change-dir><kill-line>..<enter>' "Go to parent folder"
 # Moving inside view as in vim
 bind attach,index,pager,browser \Cd half-down
