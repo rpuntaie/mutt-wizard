@@ -1,6 +1,6 @@
-=========================================
-mw(1) Version 2.0 \| mutt-wizard man page
-=========================================
+========================================
+mw(1) Version 2.0 \| mailwizard man page
+========================================
 
 ..   To test man page:
 ..
@@ -14,7 +14,7 @@ mw(1) Version 2.0 \| mutt-wizard man page
 NAME
 ====
 
-**mw** — mutt-wizard - add, list, remove email configurations for mbsync, getmail and mutt. Sync email without mutt.
+**mw** — mailwizard - add, list, remove email configurations for mbsync, getmail and mutt. Sync email without mutt.
 
 SYNOPSIS
 ========
@@ -42,10 +42,10 @@ They cannot be provided as parameters to the command.
 It is still possible to script **mw** by defining variables. 
 See the commands section.
 
-*mutt-wizard.muttrc* is linked in your *muttrc*.
+*mailwizard.muttrc* is linked in your *muttrc*.
 Have this line there, if you prefer your own settings::
 
-  # source /usr/share/mutt-wizard/mutt-wizard.muttrc
+  # source /usr/share/mailwizard/mailwizard.muttrc
 
 You will need to keep the binding of *i,g,C,M* to *noop*, though,
 because of the generated bindings in the account muttrc.
@@ -75,13 +75,13 @@ If the parameter contains @ an email is assumed and synced.
 
     Add an email without questions, e.g.::
 
-      a=x.y@gmail.com mwtype=offline mwaddr=$a mwlogin=$a mwpass=mutt-wizard-$a mwserverinfo="gmail.com,imap.gmail.com,993,smtp.gmail.com,587" mwname="your name" mw add
+      a=x.y@gmail.com mwtype=offline mwaddr=$a mwlogin=$a mwpass=mailwizard-$a mwserverinfo="gmail.com,imap.gmail.com,993,smtp.gmail.com,587" mwname="your name" mw add
 
     *mwserverinfo* can be omitted, if the email domain is in the accompanied *domains.csv*.
 
 *ls|list*
 
-    List all email accounts configured by mutt-wizard
+    List all email accounts configured by mailwizard
 
 *rm|remove*
 
@@ -169,8 +169,8 @@ INSTALLATION
 
 ::
 
-   git clone https://github.com/rpuntaie/mutt-wizard
-   cd mutt-wizard
+   git clone https://github.com/rpuntaie/mailwizard
+   cd mailwizard
    sudo make install
 
 MUTT CONFIGURATION
@@ -178,7 +178,7 @@ MUTT CONFIGURATION
 
 Once everything is setup, you’ll use **mutt** to access your mail.
 
-The accompanied *mutt-wizard.muttrc* modifies some **mutt** defaults.
+The accompanied *mailwizard.muttrc* modifies some **mutt** defaults.
 Look there for a complete list.
 
 Here an overview:
@@ -187,7 +187,7 @@ Here an overview:
 
 **syncing**
 
-- *gm / gM* - call mutt-wizard’s *mw sync* for one / all mail accounts
+- *gm / gM* - call mailwizard’s *mw sync* for one / all mail accounts
 
 **mailboxes,accounts**
 
@@ -268,7 +268,7 @@ DETAILS
 
     For Gmail allow 
     `less-secure applications <https://support.google.com/accounts/answer/6010255>`__
-    Do this before running mutt-wizard.
+    Do this before running mailwizard.
 
     Gmail uses labels instead of folders.
     To avoid local message duplication, remove labels on the
@@ -285,7 +285,7 @@ DETAILS
     Protonmail users must use the 
     `Protonmail Bridge <https://protonmail.com/bridge/>`__
     to access their IMAP and SMTP servers.
-    Do this before running mutt-wizard.
+    Do this before running mailwizard.
 
 FILES
 =====
@@ -294,21 +294,21 @@ FILES
    The main script to manage and sync emails.
 
 */user/bin/mwimage*, */user/bin/mwopen*
-   Used by the mailcap file that comes with mutt-wizard.
+   Used by the mailcap file that comes with mailwizard.
 
-*/usr/share/mutt-wizard/mutt-wizard.muttrc*
+*/usr/share/mailwizard/mailwizard.muttrc*
    Default mutt settings.
 
-*/usr/share/mutt-wizard/mailcap*
+*/usr/share/mailwizard/mailcap*
    Default mailcap file.
 
-*/usr/share/mutt-wizard/domains.csv*
+*/usr/share/mailwizard/domains.csv*
    Email server database.
 
 BUGS
 ====
 
-`GitHub Issues <https://github.com/rpuntaie/mutt-wizard/issues>`__
+`GitHub Issues <https://github.com/rpuntaie/mailwizard/issues>`__
 
 AUTHORS
 =======
@@ -322,8 +322,11 @@ AUTHORS
 
 *Roland Puntaier* <roland.puntaier@gmail.com>
    Bugfixes, Improvements in 2019.
+   Too many changes for Luke to accept the PR.
+   Credit to Luke for his initiative, though.
+   New name: mailwizard.
 
-   `GitHub: <https://github.com/rpuntaie/mutt-wizard>`__
+   `GitHub: <https://github.com/rpuntaie/mailwizard>`__
 
 LICENSE
 =======

@@ -28,7 +28,7 @@ if [ "$OK" = "OK" ]; then
     export mwmaildir=$MAILDIR
     export mwname='r n'
     export mwlogin=$mwaddr
-    export mwpass="${mwpass:-mutt-wizard-$mwaddr}"
+    export mwpass="${mwpass:-mailwizard-$mwaddr}"
     mwaccmaildir="$mwmaildir/$mwaddr"
 
     rm -rf $mwaccmaildir

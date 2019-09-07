@@ -11,8 +11,8 @@ fi
 prefix="${prefix%/bin/*}"
 mwbin="$prefix/bin/mw"
 
-_MW_="mutt-wizard"
-_MW_generated="mutt-wizard-generated"
+_MW_="mailwizard"
+_MW_generated="mailwizard-generated"
 
 mwconfigdir=${XDG_CONFIG_HOME:-$HOME/.config}
 # Main mutt config location
@@ -293,7 +293,7 @@ _mwtryconnect() {
 
     printf "\033[32mMailboxes detected.\033[0m\\n"
     if [ -z "$mwserverinfo" ]; then
-        printf "\033[32mPlease add the line below at https://github.com/rpuntaie/mutt-wizard/issues/1\033[0m\\n\\n"
+        printf "\033[32mPlease add the line below at https://github.com/rpuntaie/mailwizard/issues/1\033[0m\\n\\n"
         printf "\033[31m$mwservice,$mwurl,$mwport,$mwsurl,$mwsport\0330m\\n\\n"
     fi
 
