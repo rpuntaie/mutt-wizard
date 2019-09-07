@@ -314,19 +314,16 @@ AUTHORS
 =======
 
 *Luke Smith* <luke@lukesmith.xyz>
-   Original author, started in 2018.
-
-   `Github <https://github.com/lukesmithxyz/mutt-wizard>`__
-
+   Original author, started in 2018. See
+   `Github <https://github.com/lukesmithxyz/mutt-wizard>`__,
    `Gitlab <https://gitlab.com/lukesmithxyz/mutt-wizard>`__
 
 *Roland Puntaier* <roland.puntaier@gmail.com>
    Bugfixes, Improvements in 2019.
    Too many changes for Luke to accept the PR.
-   Credit to Luke for his initiative, though.
+   Credit to Luke for his initiative.
    New name: mailwizard.
-
-   `GitHub: <https://github.com/rpuntaie/mailwizard>`__
+   See `GitHub <https://github.com/rpuntaie/mailwizard>`__
 
 LICENSE
 =======
@@ -336,5 +333,5 @@ GPLv3
 SEE ALSO
 ========
 
-**neomutt**\ (1), **neomuttrc**\ (1) **mbsync**\ (1), **msmtp**\ (1),
-**notmuch**\ (1), **abook**\ (1)
+**neomutt**\ (1), **neomuttrc**\ (1), **mbsync**\ (1), **msmtp**\ (1),
+**getmail**\ (1), **notmuch**\ (1), **abook**\ (1)
