@@ -65,9 +65,9 @@ bind pager j next-line
 bind index l display-message
 bind browser l select-entry
 bind pager l view-attachments
-bind attach l view-mailcap
+bind attach l view-text
+bind attach <return> view-mailcap
 bind pager,attach h exit
-bind index,pager,attach <return> view-mailcap
 macro browser h '<change-dir><kill-line>..<enter>' "Go to parent folder"
 # Moving inside view as in vim
 bind attach,index,pager,browser \Cd half-down
