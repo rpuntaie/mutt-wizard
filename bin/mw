@@ -60,7 +60,7 @@ _mwcheckcert() {
 _mwcheckinternet() {
   # Checks for internet connection
   if type systemctl >/dev/null; then
-    if ! systemctl --type service | grep net | grep active > /dev/null; then
+    if ! systemctl --type service | grep -i net | grep active > /dev/null; then
       echo "No internet connection."
       return 1
     fi
