@@ -60,7 +60,7 @@ _mwcheckcert() {
 _mwcheckinternet() {
   # Checks for internet connection
   if type systemctl >/dev/null; then
-    if ! systemctl --type service | grep net | grep active > /dev/null; then
+    if ! systemctl --type service | grep -i net | grep active > /dev/null; then
       echo "No internet connection."
       return 1
     fi
@@ -95,7 +95,7 @@ _mwasktype() {
 }
 
 _mwaskinfo() {
-  if [ -z "$mwaddr" ]; then 
+  if [ -z "$mwaddr" ]; then
     printf "Type the \033[31memail address\033[0m\\n\t\033[36m"
     read -r mwaddr
     printf "\033[0m"
