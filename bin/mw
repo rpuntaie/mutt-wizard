@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION="2.0.1"
+VERSION="2.0.2"
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   prefix=${0}
@@ -545,7 +545,6 @@ set smtp_url = "$mwsmtp://$mwlogin@$mwsurl:$mwsport"
 EOF
   fi #online
   mwboxes="$(echo "$mwmailboxes" | sed -e "s/^ //g;s/.*/\"=\0\"/g" | tr "\n" " ")"
-  mwaccmutt="${mwaddr//[.@]/_}"
   cat >> "$mwaccmuttrc" <<EOF
 set spoolfile = "$mwspoolfile"
 set record = "$mwrecord"
@@ -553,7 +552,7 @@ set postponed = "$mwpostponed"
 set trash = "$mwtrash"
 
 unmailboxes *
-mailboxes =$mwaccmutt ===================== $mwboxes
+mailboxes $mwboxes
 
 macro index,pager i$mwidnum '$mwmuttsync' "switch to $mwaddr"
 

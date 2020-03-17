@@ -261,7 +261,7 @@ DETAILS
 **Mail location**
 
     Mail is downloaded to a folders named after your emails in *$MAILDIR*.
-    *$MAILDIR* defaults to *$HOME/Mail/*.
+    *$MAILDIR* defaults to *$HOME/mail/*.
     Neither **mw remove** nor **mw purge** will delete downloaded mail.
 
 **Gmail accounts**
