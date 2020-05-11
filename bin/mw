@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION="2.0.2"
+VERSION="2.0.3"
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   prefix=${0}
@@ -275,10 +275,10 @@ _mwprofiles() {
       ! type getmail > /dev/null && printf "\033[31mFor POP3 \`getmail\` must be installed to use \`mw\`. You can do that afterwards.\\n\033[0m"
       _mwgetmail POP3
     else
-      if type mbsync > /dev/null; then
-        _mwgetmail IMAP
-      else
+      if type mbsync >/dev/null; then
         _mwmbsync
+      else
+        _mwgetmail IMAP
       fi
     fi
     _mwsmtp
