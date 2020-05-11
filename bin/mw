@@ -109,6 +109,17 @@ _mwaskinfo() {
   if [ -z "$mwserverinfo" ]; then
     printf "\\nSearching for \033[32m%s\033[0m in \033[34m\`domains.csv\`\033[0m..." "$mwdomain"
     mwserverinfo="$(grep "^$mwdomain" "$mwshare/domains.csv" 2> /dev/null)"
+    if [ -z "$mwserverinfo" ]; then
+      mwsubdomain=${mwdomain%%.*}
+      if [ "$mwsubdomain" == "outlook" ] || \
+         [ "$mwsubdomain" == "yandex" ] || \
+         [ "$mwsubdomain" == "yahoo" ] || \
+         [ "$mwsubdomain" == "hotmail" ] || \
+         [ "$mwsubdomain" == "gmx" ]; then
+        mwserverinfo="$(grep "^$mwsubdomain.com" "$mwshare/domains.csv" 2> /dev/null)"
+        mwserverinfo="$mwdomain,${mwserverinfo#*,}"
+      fi
+    fi
   fi
   if [ -z "$mwserverinfo" ]; then
     printf "Your email domain is not known to $_MW_.\\nType in your settings.\\n"
@@ -286,6 +297,44 @@ _mwprofiles() {
   return 0
 }
 
+_mwIMAPmailboxes() {
+  python << EOF
+from imaplib import $mwi;
+m=$mwi('$mwurl');
+m.login('$mwlogin','$mwpw');
+z=m.list()[1];
+m.logout()
+mc = getattr(memoryview, "cast", lambda *x: x[0])
+def mb64(s):
+    s_utf7 = b'+' + s.replace(b',', b'/') + b'-'
+    return s_utf7.decode('utf-7')
+def imap4utf7(s):
+    r, d = [], []
+    s = mc(memoryview(s), 'c')
+    for c in s:
+        if c == b'&' and not d:
+            d.append(b'&')
+        elif c == b'-' and d:
+            if len(d) == 1:
+                r.append(u'&')
+            else:
+                r.append(mb64(b''.join(d[1:])))
+            d = []
+        elif d:
+            d.append(c)
+        else:
+            r.append(c.decode())
+    if d:
+        r.append(mb64(b''.join(d[1:])))
+    return u''.join(r)
+print('\n'.join(imap4utf7(e.split(b' "/" ')[-1].strip(b'"'))
+  for e in z if all(
+  x not in e for x in
+  [b'[Gmail]/All Mail',b'Noselect',b'HasChildren'])));
+EOF
+}
+
+
 _mwtryconnect() {
   if [ ! -d "$mwaccmaildir" ]; then
     [ ! "${mwkind::3}" = "pop" ] && mwaccmaildirWasThere="NO" # mutt uses $mwacccachedir for "online" IMAP, so clean up later
@@ -301,7 +350,7 @@ _mwtryconnect() {
       # for online do without mbsync, i.e. don't require it for mail setup, either
       [ "$mwport" = "143" ] && mwi="IMAP4" || mwi="IMAP4_SSL"
       mwpw="$(pass $mwpass)"
-      mwmailboxes="$(python -c "from imaplib import $mwi;m=$mwi('$mwurl');m.login('$mwlogin','$mwpw');b=m.list()[1];print('\n'.join(e.split(b' \"/\" ')[-1].strip(b'\"').decode() for e in b if all(x not in e for x in [b'[Gmail]/All Mail',b'Noselect',b'HasChildren'])));m.logout()")"
+      mwmailboxes=$(_mwIMAPmailboxes)
     fi
   fi
   if [ -n "$mwmailboxes" ]; then
