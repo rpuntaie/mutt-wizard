@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/bash
 
 echo
 echo Unit Test:
@@ -47,7 +47,8 @@ if [ "$OK" = "OK" ]; then
     mwtype=offline mw add
     mw
 
-    echo "=> In another prompt, start mutt and verify that mails are shown"
+    echo "=> In another prompt, add 'mailwizard/test/mwtesttmp/bin' to PATH"
+    echo "=> Start mutt and verify that mails are shown"
     echo "=> Press i1, wait, press i2. Verify that mutt is fast again after i2."
     echo "=> Press gm and gM, to start mw sync."
     echo "=> Answer with Y and check that mbsyncrc, msmtp/config and mutt/accounts are gone."
