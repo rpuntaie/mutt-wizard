@@ -662,7 +662,6 @@ _mwaddr() {
   mwaddr=${mwaddr/#\~/$HOME}
   mwaddr=${mwaddr#$mwmaildir/}
   mwaddr=${mwaddr%%/*}
-  mkdir -p $mwmaildir/$mwaddr
 }
 
 _mwgenmuttaccs(){
@@ -685,6 +684,7 @@ _mwgatheremails() {
   if [ -f "$mwmbsyncrc" ]; then
     for store in $(sed -ne 's/^Path\s*//p' $mwmbsyncrc); do
       _mwaddr "$store"
+      mkdir -p "$mwmaildir/$mwaddr"
       mwemails+=" $mwaddr"
     done
   fi
@@ -693,8 +693,13 @@ _mwgatheremails() {
       [ "${gmrc#$mwgetmaildir}" = "/*" ] && break
       store=$(sed -ne "s/^path\s*=\s*//p" $gmrc)
       store=${store/#\~/$HOME}
-      _mwaddr "$store"
-      mkdir -p "$store"/{cur,new,tmp}
+      if [ ! -d "$store" ]; then
+        mwaddr=${gmrc##*/}
+      else
+        _mwaddr "$store"
+      fi
+      mkdir -p "$mwmaildir/$mwaddr"
+      mkdir -p "$mwmaildir/$mwaddr/{cur,new,tmp}"
       mwemails+=" $mwaddr"
     done
   fi
@@ -763,6 +768,7 @@ _mwsync() {
   _mwcheckinternet || return 1
 
   _mwaddr "$1"
+  mkdir -p "$mwmaildir/$mwaddr"
   mwemails="$mwaddr"
   [ "$mwemails" = "" ] && _mwgatheremails && _mwsyncemails && _mwmuttemails && return 0
   _mwsyncemails
