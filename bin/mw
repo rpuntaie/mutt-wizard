@@ -215,7 +215,11 @@ _mwprotonfinger() {
 
 _mwmbsync() {
   mkdir -p "${mwmbsyncrc%/*}"
-  [ -f "$mwmbsyncrc" ] && sed -i "/IMAPStore $mwaddr-remote$/,/# End $_MW_ profile/d" "$mwmbsyncrc"
+  if [ -f "$mwmbsyncrc" ]; then
+    sed -i "/IMAPStore $mwaddr-remote$/,/# End $_MW_ profile/d" "$mwmbsyncrc"
+  else
+    touch $mwmbsyncrc"
+  fi
   cat >> "$mwmbsyncrc" <<EOF
 IMAPStore $mwaddr-remote
 Host $mwurl

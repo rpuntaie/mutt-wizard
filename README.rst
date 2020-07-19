@@ -181,7 +181,14 @@ INSTALLATION
 
    git clone https://github.com/rpuntaie/mailwizard
    cd mailwizard
+
+Then install, either globally::
+
    sudo make install
+
+or locally::
+
+   PREFIX=~/.local make install
 
 MUTT CONFIGURATION
 ==================
