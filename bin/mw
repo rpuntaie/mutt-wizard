@@ -57,9 +57,14 @@ _mwcheckcert() {
   done || { echo "CA Certificate not found. Please install one or link it to /etc/ssl/certs/ca-certificates.crt" && return 1 ;}
 }
 
+_mwchk(){
+type $1 > /dev/null 2>&1 && return 0
+return 1
+}
+
 _mwcheckinternet() {
   # Checks for internet connection
-  if type systemctl > /dev/null; then
+  if _mwchk systemctl; then
     if ! systemctl --type service | grep -i net | grep active > /dev/null; then
       echo "No internet connection."
       return 1
@@ -86,9 +91,9 @@ _mwasktype() {
     done
   fi
   if [ "$mwtype" == "offline" ]; then
-    ! type "msmtp" > /dev/null && printf "\033[31m\`msmtp\` must be installed. You can do that afterwards.\\n\033[0m"
+    ! _mwchk msmtp && printf "\033[31m\`msmtp\` must be installed. You can do that afterwards.\\n\033[0m"
   else
-    ! ( type mutt > /dev/null || type neomutt > /dev/null ) && printf "\033[31m\`mutt\` must be installed. You can do that afterwards.\\n\033[0m"
+    ! ( _mwchk mutt || _mwchk neomutt ) && printf "\033[31m\`mutt\` must be installed. You can do that afterwards.\\n\033[0m"
   fi
 
   return 0
@@ -283,12 +288,13 @@ _mwprofiles() {
 
   if [ "$mwtype" = "offline" ]; then # not online, actually outside mutt
     if [ "${mwkind::3}" = "pop" ]; then
-      ! type getmail > /dev/null && printf "\033[31mFor POP3 \`getmail\` must be installed to use \`mw\`. You can do that afterwards.\\n\033[0m"
+      ! _mwchk getmail && printf "\033[31mFor POP3 \`getmail\` must be installed to use \`mw\`. You can do that afterwards.\\n\033[0m"
       _mwgetmail POP3
     else
-      if type mbsync >/dev/null; then
+      if [[ $mwusegetmail -ne 1 ]] && _mwchk mbsync; then
         _mwmbsync
       else
+        echo "using getmail"
         _mwgetmail IMAP
       fi
     fi
@@ -299,11 +305,14 @@ _mwprofiles() {
 
 _mwIMAPmailboxes() {
   python << EOF
-from imaplib import $mwi;
-m=$mwi('$mwurl');
-m.login('$mwlogin','$mwpw');
-z=m.list()[1];
+from imaplib import $mwi
+import re
+m=$mwi('$mwurl')
+m.login('$mwlogin','$mwpw')
+zz=m.list()
 m.logout()
+assert zz[0]=='OK', "IMAP error listing mailboxes"
+z=zz[1]
 mc = getattr(memoryview, "cast", lambda *x: x[0])
 def mb64(s):
     s_utf7 = b'+' + s.replace(b',', b'/') + b'-'
@@ -327,17 +336,32 @@ def imap4utf7(s):
     if d:
         r.append(mb64(b''.join(d[1:])))
     return u''.join(r)
-print('\n'.join(imap4utf7(e.split(b' "/" ')[-1].strip(b'"'))
-  for e in z if all(
-  x not in e for x in
-  [b'[Gmail]/All Mail',b'Noselect',b'HasChildren'])));
+PRE = re.compile(
+    r'^\s*'
+    r'\((?P<attributes>[^)]*)\)'
+    r'\s+'
+    r'"(?P<delimiter>[^"]+)"'
+    r'\s+'
+    r'("?)(?P<mailbox>.+?)("?)'
+    r'\s*$'
+)
+mailboxes = []
+for item in z:
+    p = PRE.match(imap4utf7(item))
+    assert p, "IMAP error parsing mailboxes"
+    g = p.groupdict()
+    if r'\Noselect' in g['attributes'].split():
+        continue
+    if not 'All Mail' in g['mailbox']:
+        mailboxes.append(g['mailbox'].split(g['delimiter'])[-1])
+print('\n'.join(mailboxes))
 EOF
 }
 
 
 _mwtryconnect() {
   if [ ! -d "$mwaccmaildir" ]; then
-    [ ! "${mwkind::3}" = "pop" ] && mwaccmaildirWasThere="NO" # mutt uses $mwacccachedir for "online" IMAP, so clean up later
+    [ ! "${mwkind::3}" = "pop" ] && mwrmmails="YES" # mutt uses $mwacccachedir for "online" IMAP, so clean up later
     mkdir -p "$mwaccmaildir"
   fi
   if [ -z "$mwmailboxes" ]; then
@@ -409,13 +433,13 @@ _mwfinalize() { # new mwaccmuttrc
     _mwnotmuchauto #still usable for online (in mutt) pop
   fi
   if [ "$mwtype" = "online" ]; then
-    [ "$mwaccmaildirWasThere" = "NO" ] && rm -rf "$mwaccmaildir" &> /dev/null
+    [ "$mwrmmails" = "YES" ] && rm -rf "$mwaccmaildir" &> /dev/null
   fi
   return 0
 }
 
 _mwdelete() {
-  [ "$mwaccmaildirWasThere" = "NO" ] && rm -rf "$mwaccmaildir" &> /dev/null
+  [ "$mwrmmails" = "YES" ] && rm -rf "$mwaccmaildir" &> /dev/null
   rm -f "$mwaccmuttrc" &> /dev/null
   if [ "$mwtype" = "offline" ]; then # not online
     sed -i "/${mwaccmuttrc//\//\\\/}/d" "$mwgenmuttaccs" &> /dev/null
@@ -432,7 +456,7 @@ _mwdelete() {
 }
 
 _mwadd() {
-  type gpg > /dev/null 2>&1 && GPG="gpg" || GPG="gpg2"
+  _mwchk gpg && GPG="gpg" || GPG="gpg2"
   [ -z "$PASSWORD_STORE_DIR" ] && PASSWORD_STORE_DIR="$HOME/.password-store"
   [ -r "$PASSWORD_STORE_DIR/.gpg-id" ] &&
     "$GPG" --list-secret-keys $(cat "$PASSWORD_STORE_DIR/.gpg-id") > /dev/null 2>&1 || {
@@ -496,16 +520,22 @@ _mwcron() {
       | crontab - && echo "mw cronjob added. Mail will sync every $mwcronminutes minutes. Be sure you have your cron manager running."
 }
 
+_mwdelacc(){
+  mwtype="$(echo "$1" | sed "s/\.mwonofftype\./ /" | awk '{print $2}')"
+  mwaddr="$(echo "$1" | sed "s/\.mwonofftype\./ /" | awk '{print $1}')"
+  mwtype="${mwtype%.*}"
+  mwidnum1="$(echo "$mwaddr" | sed "s/-/ /" | awk '{print $1}')"
+  mwidnum=${mwidnum1##*/}
+  mwaddr="$(echo "$mwaddr" | sed "s/-/ /" | awk '{print $2}')"
+  _mwtakeaddr
+  _mwdelete
+}
+
 _mwpurge() {
   _mwconfirm "Remove all $_MW_ data" || exit
   mwaddrs="$(find "$mwaccmuttdir" -type f | grep -o "[1-9]-.*.muttrc" | sed "s/\.muttrc//")"
   for mwaddrsentry in $mwaddrs; do
-    mwtype="$(echo "$mwaddrsentry" | sed "s/\.mwonofftype\./ /" | awk '{print $2}')"
-    mwaddr="$(echo "$mwaddrsentry" | sed "s/\.mwonofftype\./ /" | awk '{print $1}')"
-    mwidnum="$(echo "$mwaddr" | sed "s/-/ /" | awk '{print $1}')"
-    mwaddr="$(echo "$mwaddr" | sed "s/-/ /" | awk '{print $2}')"
-    _mwtakeaddr
-    _mwdelete
+    _mwdelacc $mwaddrsentry
   done
   rm -rf "$mwaccmuttdir"/[1-9]-*.muttrc "$mwcachedir" "$mwgenmuttaccs"
   sed -i "/\# $_MW_generated/d" "$mwmuttrc"
@@ -650,7 +680,7 @@ EOF
 if [ "$(uname)" = "Darwin" ]; then
   _mwnotify() { osascript -e "display notification \"$2 in $1\" with title \"You've got Mail\" subtitle \"Account: $1\"" ;}
 else
-  if type notify-send > /dev/null; then
+  if _mwchk notify-send; then
     _mwnotify() { notify-send "mw" "📬 $2 new mail(s) in \`$1\` account." ;}
   else
     _mwnotify() { echo "mw: 📬 $2 new mail(s) in \`$1\` account." ;}
@@ -760,6 +790,10 @@ _mwsync() {
     echo "mbsync is running."
     return 1
   fi
+  if pgrep -x getmail > /dev/null; then
+    echo "getmail is running."
+    return 1
+  fi
   if pgrep -x notmuch > /dev/null; then
     echo "notmuch is running."
     return 1
@@ -782,7 +816,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
 
 if [ "$#" -gt 1 ]; then
   echo "Command or email or no parameter (=sync all). See --help."
-  return 1
+  exit 1
 fi
 
 if [ "$1" = "" ]; then
@@ -793,7 +827,16 @@ else
     list|ls) _mwlist ;;
     add) _mwadd ;;
     pass) _mwpick "change the password of" && _mwgetpass ;;
-    remove|rm) _mwpick remove && _mwconfirm "remove the \`$mwaddr\` profile" && _mwdelete ;;
+    remove|rm)
+        if [[ -n $mwaddr ]]; then
+            mwaddrs=$(find "$mwaccmuttdir" -iname "*$mwaddr*")
+            for mwaddrsentry in $mwaddrs; do
+              _mwdelacc $mwaddrsentry
+            done
+        else
+            _mwpick remove && _mwconfirm "remove the \`$mwaddr\` profile" && _mwdelete
+        fi
+        ;;
     purge) _mwpurge ;;
     cron) _mwcron ;;
     sync) _mwsync ;;

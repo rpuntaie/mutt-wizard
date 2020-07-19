@@ -5,6 +5,8 @@ echo Unit Test:
 echo
 bats --tap test_mw.bats
 
+bash test_getmail.sh
+
 echo
 echo "Integration tests need working email $mwaddr"
 
