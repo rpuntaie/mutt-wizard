@@ -1,5 +1,5 @@
 ==========================================
-mw(1) Version 2.0.3 \| mailwizard man page
+mw(1) Version 2.0.4 \| mailwizard man page
 ==========================================
 
 ..   To test man page:
@@ -87,9 +87,19 @@ If the parameter contains @ an email is assumed and synced.
 
     Remove the configuration files for an already configured email
 
-    Remove without questions the email whose generated muttrc starts with 1::
+    Remove without question:
 
-      mwpick=1 mw rm <<<y
+    - by email whose generated muttrc starts with 1::
+
+        mwaddr=$email mw rm
+
+        #the following removes also the emails
+
+        mwrmmails=YES mwaddr=$email mw rm
+
+    - by number of the generated muttrc (e.g. 1 here)::
+
+        mwpick=1 mw rm <<<y
 
 *purge*
 
