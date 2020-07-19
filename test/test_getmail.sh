@@ -48,6 +48,9 @@ for kind_email in $( pass find getmail ); do
         kind_emails+=" $kind_email"
     fi
 done
+if [[ -z $kind_emails ]]; then
+    echo "test_getmail.sh needs 'pass insert getmail/...'"
+fi
 for ke in $kind_emails; do
 
     ##comment
