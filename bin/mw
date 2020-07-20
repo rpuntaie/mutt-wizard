@@ -730,6 +730,7 @@ _mwgatheremails() {
       store=$(sed -ne "s/^path\s*=\s*//p" $gmrc)
       store=${store/#\~/$HOME}
       if [ ! -d "$store" ]; then
+        #MDA_external
         mwaddr=${gmrc##*/}
       else
         _mwaddr "$store"
@@ -867,8 +868,8 @@ else
 
   Config requirements:
 
-  - mbsyncrc: "Path" ends in email
-  - getmail: config file name = email, "path" ends in email
+  - isync/mbsyncrc file: "Path" inside mbsyncrc ends in <email>/[<mailbox dir>]
+  - getmail config folder: first "path": same, if directory ELSE config file name = email
 
 EOF
   esac
