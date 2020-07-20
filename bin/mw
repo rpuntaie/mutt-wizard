@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 VERSION="2.0.4"
 
@@ -218,7 +218,7 @@ _mwmbsync() {
   if [ -f "$mwmbsyncrc" ]; then
     sed -i "/IMAPStore $mwaddr-remote$/,/# End $_MW_ profile/d" "$mwmbsyncrc"
   else
-    touch $mwmbsyncrc"
+    touch "$mwmbsyncrc"
   fi
   cat >> "$mwmbsyncrc" <<EOF
 IMAPStore $mwaddr-remote
@@ -308,13 +308,15 @@ _mwprofiles() {
 }
 
 _mwIMAPmailboxes() {
-  python << EOF
+  python <<EOF
 from imaplib import $mwi
 import re
+lg=lambda x: open('/home/roland/tmp/4utf7.log','a').write(x+'\n')
 m=$mwi('$mwurl')
 m.login('$mwlogin','$mwpw')
 zz=m.list()
 m.logout()
+lg(str(zz))
 assert zz[0]=='OK', 'IMAP error listing mailboxes'
 z=zz[1]
 mc = getattr(memoryview, 'cast', lambda *x: x[0])
@@ -340,28 +342,28 @@ def imap4utf7(s):
     if d:
         r.append(mb64(b''.join(d[1:])))
     return u''.join(r)
-PRE = re.compile(
-    r'^\s*'
-    r'\((?P<attributes>[^)]*)\)'
-    r'\s+'
-    r'"(?P<delimiter>[^"]+)"'
-    r'\s+'
-    r'("?)(?P<mailbox>.+?)("?)'
-    r'\s*$'
-)
 mailboxes = []
 for item in z:
-    p = PRE.match(imap4utf7(item))
+    p = re.match(
+      r'^\s*'
+      r'\((?P<attributes>[^)]*)\)'
+      r'\s+'
+      r'"(?P<delimiter>[^"]+)"'
+      r'\s+'
+      r'("?)(?P<mailbox>.+?)("?)'
+      r'\s*\$'
+      ,imap4utf7(item)
+    )
     assert p, 'IMAP error parsing mailboxes'
     g = p.groupdict()
     if r'\Noselect' in g['attributes'].split():
         continue
     if not 'All Mail' in g['mailbox']:
-        mailboxes.append(g['mailbox'].split(g['delimiter'])[-1])
+        mailboxes.append(g['mailbox'])
+        #mailboxes.append(g['mailbox'].split(g['delimiter'])[-1])
 print('\n'.join(mailboxes))
 EOF
 }
-
 
 _mwtryconnect() {
   if [ ! -d "$mwaccmaildir" ]; then
