@@ -4,10 +4,10 @@ VERSION="2.0.4"
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   prefix=${0}
+  [ -n $prefix ] && [ ${prefix::1} != "/" ] && prefix="$PWD/$prefix"
 else
   prefix="$BASH_SOURCE"
 fi
-[ ! ${prefix::1} = "/" ] && prefix="$PWD/$prefix"
 prefix="${prefix%/bin/*}"
 mwbin="$prefix/bin/mw"
 
@@ -645,7 +645,7 @@ set ssl_force_tls = ${mwssl/nos/yes}
 set smtp_pass = "\`pass $mwpass\`"
 
 EOF
-    fi # imap
+    fi # pop or imap
     #smtp
     [ "$mwsport" = "25" ] && mwsmtp="smtp" || mwsmtp="smtps"
     cat >> "$mwaccmuttrc" <<EOF
@@ -661,7 +661,11 @@ set postponed = "$mwpostponed"
 set trash = "$mwtrash"
 
 unmailboxes *
+EOF
+  [ "$mwtype" = "offline" ] && cat >> "$mwaccmuttrc" <<EOF
 mailboxes $mwboxes
+EOF
+  cat >> "$mwaccmuttrc" <<EOF
 
 macro index,pager i$mwidnum '$mwmuttsync' "switch to $mwaddr"
 
