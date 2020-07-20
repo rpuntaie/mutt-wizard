@@ -315,9 +315,9 @@ m=$mwi('$mwurl')
 m.login('$mwlogin','$mwpw')
 zz=m.list()
 m.logout()
-assert zz[0]=='OK', "IMAP error listing mailboxes"
+assert zz[0]=='OK', 'IMAP error listing mailboxes'
 z=zz[1]
-mc = getattr(memoryview, "cast", lambda *x: x[0])
+mc = getattr(memoryview, 'cast', lambda *x: x[0])
 def mb64(s):
     s_utf7 = b'+' + s.replace(b',', b'/') + b'-'
     return s_utf7.decode('utf-7')
@@ -352,7 +352,7 @@ PRE = re.compile(
 mailboxes = []
 for item in z:
     p = PRE.match(imap4utf7(item))
-    assert p, "IMAP error parsing mailboxes"
+    assert p, 'IMAP error parsing mailboxes'
     g = p.groupdict()
     if r'\Noselect' in g['attributes'].split():
         continue
