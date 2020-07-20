@@ -53,7 +53,7 @@ _mwcheckcert() {
   for mwcrt in "/etc/ssl/certs/ca-certificates.crt" "/etc/pki/tls/certs/ca-bundle.crt" "/etc/ssl/ca-bundle.pem" \
     "/etc/pki/tls/cacert.pem" "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" "/etc/ssl/cert.pem" "/usr/local/share/ca-certificates/"
   do
-    [ -f "$mwcrt" ] && mwsslcert="$mwcrt" && break
+    [ -e "$mwcrt" ] && mwsslcert="$mwcrt" && break
   done || { echo "CA Certificate not found. Please install one or link it to /etc/ssl/certs/ca-certificates.crt" && return 1 ;}
 }
 
@@ -215,7 +215,7 @@ _mwprotonfinger() {
 
 _mwmbsync() {
   mkdir -p "${mwmbsyncrc%/*}"
-  if [ -f "$mwmbsyncrc" ]; then
+  if [ -e "$mwmbsyncrc" ]; then
     sed -i "/IMAPStore $mwaddr-remote$/,/# End $_MW_ profile/d" "$mwmbsyncrc"
   else
     touch "$mwmbsyncrc"
@@ -404,7 +404,7 @@ _mwtryconnect() {
 
 _mwnotmuchauto() {
   [ -z "$NOTMUCH_CONFIG" ] && NOTMUCH_CONFIG="$HOME/.notmuch-config"
-  [ -f "$NOTMUCH_CONFIG" ] && return 0
+  [ -e "$NOTMUCH_CONFIG" ] && return 0
   mkdir -p "${NOTMUCH_CONFIG%/*}"
   cat > "$NOTMUCH_CONFIG" <<EOF
 [database]
@@ -450,7 +450,7 @@ _mwdelete() {
   if [ "$mwtype" = "offline" ]; then # not online
     sed -i "/${mwaccmuttrc//\//\\\/}/d" "$mwgenmuttaccs" &> /dev/null
     sed -i "/account $mwaddr/,/^\(\s*$\|account\)/d" "$mwmsmtprc" &> /dev/null
-    if [ -f "$mwgetmaildir/$mwaddr" ]; then
+    if [ -e "$mwgetmaildir/$mwaddr" ]; then
       rm -f "$mwgetmaildir/$mwaddr" &> /dev/null
     else
       sed -i "/IMAPStore $mwaddr-remote$/,/# End $_MW_ profile/d" "$mwmbsyncrc" &> /dev/null
@@ -717,7 +717,7 @@ EOF
 _mwgatheremails() {
   unset mwemails
   _mwgenmuttaccs
-  if [ -f "$mwmbsyncrc" ]; then
+  if [ -e "$mwmbsyncrc" ]; then
     for store in $(sed -ne 's/^Path\s*//p' $mwmbsyncrc); do
       _mwaddr "$store"
       mkdir -p "$mwmaildir/$mwaddr"
@@ -745,7 +745,7 @@ _mwgatheremails() {
 
 _mwsyncandnotify() {
   mwaccmaildir="$mwmaildir/$mwaddr"
-  if [ -f "$mwgetmaildir/$mwaddr" ]; then
+  if [ -e "$mwgetmaildir/$mwaddr" ]; then
     getmail --rcfile=$mwaddr --getmaildir=$mwgetmaildir
   else
     mbsync -c $mwmbsyncrc $mwaddr
