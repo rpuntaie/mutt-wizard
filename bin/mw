@@ -180,7 +180,7 @@ EOF
 
 _mwsmtp() {
   mkdir -p "${mwmsmtprc%/*}"
-  if [ ! -f "$mwmsmtprc" ]; then
+  if [ ! -e "$mwmsmtprc" ]; then
     cat > "$mwmsmtprc" <<EOF
 defaults
 auth  on
@@ -288,7 +288,7 @@ EOF
 _mwprofiles() {
   printf "Creating profiles for \`%s\`..." "$mwaddr"
   # mutt
-  [ ! -f "$mwgenmuttaccs" ] && _mwgenmuttaccs
+  [ ! -e "$mwgenmuttaccs" ] && _mwgenmuttaccs
 
   if [ "$mwtype" = "offline" ]; then # not online, actually outside mutt
     if [ "${mwkind::3}" = "pop" ]; then
@@ -566,7 +566,7 @@ _mwgenmwaccmuttrc() {
   mwmailboxes="$(find "$mwaccmaildir/" -name cur | sed "s,$mwaccmaildir/,,g;s,/cur,,")"
   # find mwaccmuttrc ...
   mwaccmuttrc="$mwaccmuttdir/$(find "$mwaccmuttdir" -type f | grep -m 1 -o "[1-9]-$mwaddr.mwonofftype.$mwtype.muttrc")"
-  if [ ! -f "$mwaccmuttrc" ]; then
+  if [ ! -e "$mwaccmuttrc" ]; then
     # new mwidnum = first one missing
     _mwaddrs
     for mwx in $(seq 1 9); do echo "$mwaddrs" | grep "$mwx:" > /dev/null 2>&1 || { export mwidnum="$mwx"; break ;}; done
@@ -702,7 +702,7 @@ _mwaddr() {
 
 _mwgenmuttaccs(){
   mkdir -p "$mwmuttdir" "$mwaccmuttdir"
-  [ ! -f "$mwmuttrc" ] && echo "# vim: filetype=muttrc" > "$mwmuttrc" && echo "muttrc created."
+  [ ! -e "$mwmuttrc" ] && echo "# vim: filetype=muttrc" > "$mwmuttrc" && echo "muttrc created."
   ! grep "source $mwsharerc" "$mwmuttrc" > /dev/null && echo "source $mwsharerc # $_MW_generated" >> "$mwmuttrc"
   ! grep "source $mwgenmuttaccs" "$mwmuttrc" > /dev/null && echo "source $mwgenmuttaccs # $_MW_generated" >> "$mwmuttrc"
   cat > "$mwgenmuttaccs" <<EOF
