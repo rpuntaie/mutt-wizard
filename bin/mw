@@ -40,6 +40,16 @@ _mwtakeaddr(){
   [ -n "$mwidnum" ] && mwaccmuttrc="$mwaccmuttdir/$mwidnum-$mwaddr.mwonofftype.$mwtype.muttrc"
 }
 
+_mwf() {
+  if [ -f $1 ]
+     return 0
+  if [ -L $1 ] ; then
+     [ ! -e $1 ] && rm $1
+     return 0
+  fi
+  return 1
+}
+
 _mwaddrs() {
   mwaddrs="$(find "$mwaccmuttdir" -type f | grep -o "[1-9]-.*.muttrc" | sed "s/-/: /;s/\.muttrc//" | sort -n)"
 }
@@ -53,7 +63,7 @@ _mwcheckcert() {
   for mwcrt in "/etc/ssl/certs/ca-certificates.crt" "/etc/pki/tls/certs/ca-bundle.crt" "/etc/ssl/ca-bundle.pem" \
     "/etc/pki/tls/cacert.pem" "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" "/etc/ssl/cert.pem" "/usr/local/share/ca-certificates/"
   do
-    [ -e "$mwcrt" ] && mwsslcert="$mwcrt" && break
+    _mwf "$mwcrt" && mwsslcert="$mwcrt" && break
   done || { echo "CA Certificate not found. Please install one or link it to /etc/ssl/certs/ca-certificates.crt" && return 1 ;}
 }
 
@@ -180,7 +190,7 @@ EOF
 
 _mwsmtp() {
   mkdir -p "${mwmsmtprc%/*}"
-  if [ ! -e "$mwmsmtprc" ]; then
+  if ! _mwf "$mwmsmtprc"; then
     cat > "$mwmsmtprc" <<EOF
 defaults
 auth  on
@@ -215,7 +225,7 @@ _mwprotonfinger() {
 
 _mwmbsync() {
   mkdir -p "${mwmbsyncrc%/*}"
-  if [ -e "$mwmbsyncrc" ]; then
+  if _mwf "$mwmbsyncrc"; then
     sed -i "/IMAPStore $mwaddr-remote$/,/# End $_MW_ profile/d" "$mwmbsyncrc"
   else
     touch "$mwmbsyncrc"
@@ -288,7 +298,7 @@ EOF
 _mwprofiles() {
   printf "Creating profiles for \`%s\`..." "$mwaddr"
   # mutt
-  [ ! -e "$mwgenmuttaccs" ] && _mwgenmuttaccs
+  ! _mwf "$mwgenmuttaccs" && _mwgenmuttaccs
 
   if [ "$mwtype" = "offline" ]; then # not online, actually outside mutt
     if [ "${mwkind::3}" = "pop" ]; then
@@ -404,7 +414,7 @@ _mwtryconnect() {
 
 _mwnotmuchauto() {
   [ -z "$NOTMUCH_CONFIG" ] && NOTMUCH_CONFIG="$HOME/.notmuch-config"
-  [ -e "$NOTMUCH_CONFIG" ] && return 0
+  _mwf "$NOTMUCH_CONFIG" && return 0
   mkdir -p "${NOTMUCH_CONFIG%/*}"
   cat > "$NOTMUCH_CONFIG" <<EOF
 [database]
@@ -450,7 +460,7 @@ _mwdelete() {
   if [ "$mwtype" = "offline" ]; then # not online
     sed -i "/${mwaccmuttrc//\//\\\/}/d" "$mwgenmuttaccs" &> /dev/null
     sed -i "/account $mwaddr/,/^\(\s*$\|account\)/d" "$mwmsmtprc" &> /dev/null
-    if [ -e "$mwgetmaildir/$mwaddr" ]; then
+    if _mwf "$mwgetmaildir/$mwaddr"; then
       rm -f "$mwgetmaildir/$mwaddr" &> /dev/null
     else
       sed -i "/IMAPStore $mwaddr-remote$/,/# End $_MW_ profile/d" "$mwmbsyncrc" &> /dev/null
@@ -566,7 +576,7 @@ _mwgenmwaccmuttrc() {
   mwmailboxes="$(find "$mwaccmaildir/" -name cur | sed "s,$mwaccmaildir/,,g;s,/cur,,")"
   # find mwaccmuttrc ...
   mwaccmuttrc="$mwaccmuttdir/$(find "$mwaccmuttdir" -type f | grep -m 1 -o "[1-9]-$mwaddr.mwonofftype.$mwtype.muttrc")"
-  if [ ! -e "$mwaccmuttrc" ]; then
+  if ! _mwf "$mwaccmuttrc"; then
     # new mwidnum = first one missing
     _mwaddrs
     for mwx in $(seq 1 9); do echo "$mwaddrs" | grep "$mwx:" > /dev/null 2>&1 || { export mwidnum="$mwx"; break ;}; done
@@ -702,7 +712,7 @@ _mwaddr() {
 
 _mwgenmuttaccs(){
   mkdir -p "$mwmuttdir" "$mwaccmuttdir"
-  [ ! -e "$mwmuttrc" ] && echo "# vim: filetype=muttrc" > "$mwmuttrc" && echo "muttrc created."
+  ! _mwf "$mwmuttrc" && echo "# vim: filetype=muttrc" > "$mwmuttrc" && echo "muttrc created."
   ! grep "source $mwsharerc" "$mwmuttrc" > /dev/null && echo "source $mwsharerc # $_MW_generated" >> "$mwmuttrc"
   ! grep "source $mwgenmuttaccs" "$mwmuttrc" > /dev/null && echo "source $mwgenmuttaccs # $_MW_generated" >> "$mwmuttrc"
   cat > "$mwgenmuttaccs" <<EOF
@@ -717,7 +727,7 @@ EOF
 _mwgatheremails() {
   unset mwemails
   _mwgenmuttaccs
-  if [ -e "$mwmbsyncrc" ]; then
+  if _mwf "$mwmbsyncrc"; then
     for store in $(sed -ne 's/^Path\s*//p' $mwmbsyncrc); do
       _mwaddr "$store"
       mkdir -p "$mwmaildir/$mwaddr"
@@ -745,7 +755,7 @@ _mwgatheremails() {
 
 _mwsyncandnotify() {
   mwaccmaildir="$mwmaildir/$mwaddr"
-  if [ -e "$mwgetmaildir/$mwaddr" ]; then
+  if _mwf "$mwgetmaildir/$mwaddr"; then
     getmail --rcfile=$mwaddr --getmaildir=$mwgetmaildir
   else
     mbsync -c $mwmbsyncrc $mwaddr
