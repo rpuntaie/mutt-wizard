@@ -321,12 +321,10 @@ _mwIMAPmailboxes() {
   python <<EOF
 from imaplib import $mwi
 import re
-lg=lambda x: open('/home/roland/tmp/4utf7.log','a').write(x+'\n')
 m=$mwi('$mwurl')
 m.login('$mwlogin','$mwpw')
 zz=m.list()
 m.logout()
-lg(str(zz))
 assert zz[0]=='OK', 'IMAP error listing mailboxes'
 z=zz[1]
 mc = getattr(memoryview, 'cast', lambda *x: x[0])
@@ -370,7 +368,6 @@ for item in z:
         continue
     if not 'All Mail' in g['mailbox']:
         mailboxes.append(g['mailbox'])
-        #mailboxes.append(g['mailbox'].split(g['delimiter'])[-1])
 print('\n'.join(mailboxes))
 EOF
 }
