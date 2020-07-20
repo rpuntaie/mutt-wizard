@@ -30,12 +30,13 @@ mkportnr(){
 testemail(){
     if type /usr/bin/neomutt > /dev/null 2>&1; then
         echo "test 1 sent via neomutt" | /usr/bin/neomutt -s "testing as subject" $email > /dev/null 2>&1
+        #echo "test 1 sent via neomutt" | /usr/bin/neomutt -s "testing as subject" $email
     else
         echo "test 1 sent via mutt" | /usr/bin/mutt -s "testing as subject" $email > /dev/null 2>&1
     fi
     if [ $? -ne 0 ]; then
         echo "mutt failed ... sending one email using msmtp"
-        echo "test 1 sent via mutt" | /usr/bin/msmtp -a roland.puntaier@gmail.com $email
+        echo "test 1 sent via mutt" | /usr/bin/msmtp -a puntaier.roland@gmail.com $email
         sleep 20
     else
         sleep 3
@@ -45,7 +46,7 @@ declare -a kind_emails
 kind_emails=()
 for kind_email in $( pass find getmail ); do
     if [[ $kind_email =~ ^.*@.* ]]; then
-        kind_emails+=" $kind_email"
+        kind_emails+="$kind_email "
     fi
 done
 if [[ -z $kind_emails ]]; then
@@ -55,7 +56,7 @@ for ke in $kind_emails; do
 
     ##comment
     #echo $kind_emails
-    #ke=$kind_emails[4]
+    #ke=${kind_emails[1]%%( )*}
 
     echo $ke
 
