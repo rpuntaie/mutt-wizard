@@ -28,15 +28,16 @@ mkportnr(){
     esac
 }
 testemail(){
+    txtinfo="я αβ один süße créme in Tromsœ."
     if type /usr/bin/neomutt > /dev/null 2>&1; then
-        echo "test 1 sent via neomutt" | /usr/bin/neomutt -s "testing as subject" $email > /dev/null 2>&1
+        echo "Neomutt, $txtinfo" | /usr/bin/neomutt -s "testing as subject" $email > /dev/null 2>&1
         #echo "test 1 sent via neomutt" | /usr/bin/neomutt -s "testing as subject" $email
     else
-        echo "test 1 sent via mutt" | /usr/bin/mutt -s "testing as subject" $email > /dev/null 2>&1
+        echo "Mutt, $txtinfo" | /usr/bin/mutt -s "testing as subject" $email > /dev/null 2>&1
     fi
     if [ $? -ne 0 ]; then
         echo "mutt failed ... sending one email using msmtp"
-        echo "test 1 sent via mutt" | /usr/bin/msmtp -a puntaier.roland@gmail.com $email
+        echo "Msmtp, $txtinfo" | /usr/bin/msmtp -a puntaier.roland@gmail.com $email
         sleep 20
     else
         sleep 3
