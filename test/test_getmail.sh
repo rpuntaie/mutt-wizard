@@ -66,8 +66,12 @@ for ke in $kind_emails; do
     srv=${srvkind%.*}
     srvgm=${srv%_*}.${email#*@}
     srvsmtp=${srv#*_}.${email#*@}
+    srvgm=${srvgm/chello/upcmail}
+    srvsmtp=${srvsmtp/chello/upcmail}
     kind=${srvkind#*.}
     mkportnr $kind
+    [ $portnr = "995" ] && kind='POP3'
+    [ $portnr = "993" ] && kind='IMAP'
     # portnr
     mws="${email#*@},${srvgm},${portnr},${srvsmtp},587"
     mwn="Test Person"
@@ -77,8 +81,62 @@ for ke in $kind_emails; do
     mwusegetmail=1 mwtype=offline mwaddr=$email mwlogin=$email mwpass=$mwp mwserverinfo=$mws mwname=$mwn ~/.local/bin/mw add > /dev/null 2>&1
     testemail
     ~/.local/bin/mw $email > /dev/null 2>&1
-    cntreceived=$(find $MAILDIR/$email/ -name '*.localhost' | wc -l)
-    mwrmmails=YES mwaddr=$email ~/.local/bin/mw rm > /dev/null 2>&1
+    cntreceived=$(find $MAILDIR/$email/ -type f | wc -l)
     [ $cntreceived -ge 1 ] && echo "===========> PASS " || echo "===========> FAIL"
+
+    echo "getmail to procmail and filters"
+    testemail
+    cwd=$(pwd)
+    mkdir -p procmailtest/Mail/tests/{cur,tmp,new}
+    cat > procmailtest/getmail <<EOF
+[retriever]
+type = Simple${kind}SSLRetriever
+server = $srvgm
+username = $email
+port = $portnr
+password_command = ("pass", "$mwp")
+
+[destination]
+type = MDA_external
+path = /usr/bin/procmail
+arguments = ("-f", "%(sender)", "-m", "$cwd/procmailtest/procmail")
+
+#pacman -S spamassassin
+[filter-1]
+type = Filter_external
+path = /usr/bin/vendor_perl/spamc
+ignore_header_shrinkage = True
+
+#pacman -S clamav
+[filter-2]
+type = Filter_classifier
+path = /usr/bin/clamscan
+arguments = ("--stdout", "--no-summary",
+    "--scan-mail", "--infected", "-")
+exitcodes_drop = (1,)
+
+[options]
+read_all = true
+delete = true
+EOF
+    cat > procmailtest/procmail <<EOF
+MAILDIR=$cwd/procmailtest/Mail
+DEFAULT=\$MAILDIR/INBOX
+
+:0
+* ^Subject:.*test.*
+tests/
+
+:0
+\$DEFAULT/
+
+EOF
+
+    getmail --rcfile=getmail --getmaildir=$cwd/procmailtest
+    cntreceived=$(find $cwd/procmailtest/Mail/tests/new -type f | wc -l)
+    [ $cntreceived -ge 1 ] && echo "===========> PASS " || echo "===========> FAIL"
+    rm -rf procmailtest
+
+    mwrmmails=YES mwaddr=$email ~/.local/bin/mw rm > /dev/null 2>&1
 done
 
