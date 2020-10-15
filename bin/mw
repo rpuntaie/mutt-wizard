@@ -148,6 +148,7 @@ _mwaskinfo() {
     read -r mwsport
     printf "\033[0m\\nIf you want, you can copy the line below and add it to the \`domains.csv\` file on Github, for others.\\n\\n"
     printf "%s,%s,%s,%s,%s\\n\\nBut be sure the setting works, first! ;-)\\n" "$mwdomain" "$mwurl" "$mwport" "$mwsurl" "$mwsport"
+    mwservice="$mwdomain"
   else # found server info
     IFS=, read -r mwservice mwurl mwport mwsurl mwsport <<EOF
 $mwserverinfo
@@ -396,7 +397,7 @@ _mwtryconnect() {
     printf "\033[32mMailboxes detected.\033[0m\\n"
     if [ -z "$mwserverinfo" ]; then
         printf "\033[32mPlease add the line below at https://github.com/rpuntaie/mailwizard/issues/1\033[0m\\n\\n"
-        printf "\033[31m$mwservice,$mwurl,$mwport,$mwsurl,$mwsport\0330m\\n\\n"
+        printf "\033[31m$mwservice,$mwurl,$mwport,$mwsurl,$mwsport\033[0m\\n\\n"
     fi
 
     echo "$mwmailboxes" | xargs -I {} mkdir -p "$mwaccmaildir/{}/"{cur,new,tmp}
