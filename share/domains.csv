@@ -309,3 +309,4 @@ zoho.com,imap.zoho.com,993,smtp.zoho.com,465
 zohopro.com,imappro.zoho.com,993,smtp.zoho.com,465
 maua.br,outlook.office365.com,993,smtp.office365.com,587
 virginmedia.com,imap.virginmedia.com,993,smtp.virginmedia.com,465
+mailo.com,mail.mailo.com,993,mail.mailo.com,465
