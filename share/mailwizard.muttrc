@@ -19,7 +19,7 @@ set query_command = "abook --mutt-query '%s'"
 set rfc2047_parameters = yes
 set sleep_time = 0             # Pause 0 seconds for informational messages
 set markers = no               # Disables the `+` displayed at line wraps
-set mark_old = no              # Unread mail stay unread until read
+set mark_old = yes             # Unread mail stay unread until read
 set mime_forward = yes         # attachments are forwarded with mail
 set wait_key = no              # mutt won't ask "press key to continue"
 set fast_reply                 # skip to compose when replying
