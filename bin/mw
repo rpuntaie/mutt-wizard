@@ -30,7 +30,7 @@ mwshare="$prefix/share/$_MW_"
 mwmbsyncrc="$mwconfigdir/isync/mbsyncrc"
 mwgetmaildir=$mwconfigdir/getmail
 mwmsmtprc="$mwconfigdir/msmtp/config"
-mwmprocmailrcdir="$mwconfigdir/procmail"
+mwprocmaildir="$mwconfigdir/procmail"
 mwsharerc="$mwshare/$_MW_.muttrc"
 mwcachedir="${XDG_CACHE_HOME:-$HOME/.cache}/$_MW_"
 
@@ -258,9 +258,30 @@ MaxMessages 0
 EOF
 }
 
+# if there, one can use it via the getmail rc (see below)
+_mwprocmail() {
+    if [ ! -e $mwprocmaildir/$mwaddr ] ; then
+      mkdir -p "$mwprocmaildir"
+      cat > "$mwprocmaildir/$mwaddr" <<EOF
+MAILDIR=$mwmaildir/$mwaddr
+
+## example
+# :0
+# * ^From.*@.*youtube\.com
+# _/youtube/
+
+:0
+INBOX/
+EOF
+    fi
+}
+
 _mwgetmail() {
     mkdir -p "$mwgetmaildir"
     cat > "$mwgetmaildir/$mwaddr" <<EOF
+#directly via getmail
+#getmail --rcfile=$mwaddr --getmaildir=$mwgetmaildir
+
 [retriever]
 type = Simple${1}SSLRetriever
 server = $mwurl
@@ -275,7 +296,7 @@ path = $mwaccmaildir/INBOX/
 # [destination]
 # type = MDA_external
 # path = /usr/bin/procmail
-# arguments = ('-f', '%(sender)', '-m', '$mwmprocmailrcdir/$mwaddr')
+# arguments = ('-f', '%(sender)', '-m', '$mwprocmaildir/$mwaddr')
 
 [options]
 read_all = true
@@ -307,10 +328,14 @@ _mwprofiles() {
   ! _mwf "$mwgenmuttaccs" && _mwgenmuttaccs
 
   if [ "$mwtype" = "offline" ]; then # not online, actually outside mutt
+    _mwprocmail
     if [ "${mwkind::3}" = "pop" ]; then
       ! _mwchk getmail && printf "\033[31mFor POP3 \`getmail\` must be installed to use \`mw\`. You can do that afterwards.\\n\033[0m"
       _mwgetmail POP3
     else
+      if ! _mwchk mbsync; then
+        mwusegetmail=1
+      fi
       if [[ $mwusegetmail -ne 1 ]] && _mwchk mbsync; then
         _mwmbsync
       else
