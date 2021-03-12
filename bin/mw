@@ -277,7 +277,7 @@ EOF
 }
 
 _mwgetmail() {
-    if [ ! -L $mwprocmaildir/$mwaddr ] ; then
+    if [ ! -L $mwgetmaildir/$mwaddr ] ; then
       mkdir -p "$mwgetmaildir"
       cat > "$mwgetmaildir/$mwaddr" <<EOF
 #directly via getmail
@@ -817,7 +817,7 @@ _mwsyncemails() {
     _mwsyncandnotify
   done
   rm $XDG_CONFIG_HOME/getmail/oldmail-* &> /dev/null
-  if _mwchk notmuch ; then
+  if _mwchk notmuch && [[ "$MWNOTMUCHNEW" != "0" ]]; then
     echo notmuch new ...
     notmuch new &> /dev/null
   fi

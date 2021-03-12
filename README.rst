@@ -78,6 +78,7 @@ If the parameter contains @ an email is assumed and synced.
       a=x.y@gmail.com mwtype=offline mwaddr=$a mwlogin=$a mwpass=mailwizard-$a mwserverinfo="gmail.com,imap.gmail.com,993,smtp.gmail.com,587" mwname="your name" mw add
 
     *mwserverinfo* can be omitted, if the email domain is in the accompanied *domains.csv*.
+    *mwusegetmail=1* as additional define uses getmail instead of mbsync.
 
 *ls|list*
 
@@ -139,6 +140,9 @@ If the parameter contains @ an email is assumed and synced.
     So you could edit them after or not use *mw add* at all.
 
     Just keep the *Path*, *path* and *account* ending in the email address.
+
+    If *notmuch* is installed,
+    then *export MWNOTMUCHNEW=0* suppresses calling it at sync.
 
 DEPENDENCIES
 ============
