@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="2.0.4"
+VERSION="2.0.5"
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   prefix=${0}
@@ -781,7 +781,9 @@ _mwgatheremails() {
       fi
       mkdir -p "$mwmaildir/$mwaddr"
       mkdir -p "$mwmaildir/$mwaddr/{cur,new,tmp}"
-      mwemails+=" $mwaddr"
+      if [[ ! " ${mwemails[@]} " =~ " ${mwaddr} " ]]; then
+        mwemails+=" $mwaddr"
+      fi
     done
   fi
   mwemails="${mwemails/ /}"
