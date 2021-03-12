@@ -1,15 +1,6 @@
 ==========================================
-mw(1) Version 2.0.4 \| mailwizard man page
+mw(1) Version 2.0.5 \| mailwizard man page
 ==========================================
-
-..   To test man page:
-..
-..     pandoc README.rst -s -t man | /usr/bin/man -l -
-..
-..   The generate:
-..
-..     pandoc README.rst -s -t man -o mw.1
-
 
 NAME
 ====

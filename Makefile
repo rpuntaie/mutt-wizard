@@ -8,6 +8,7 @@ else
 endif
 MANPREFIX = $(PREFIX)/share/man
 
+.PHONY: install
 install:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	for script in bin/*; do \
@@ -22,6 +23,7 @@ install:
 	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	cp -f mw.1 $(DESTDIR)$(MANPREFIX)/man1/mw.1
 
+.PHONY: uninstall
 uninstall:
 	for script in bin/*; do \
 		rm -f $(DESTDIR)$(PREFIX)/$$script; \
@@ -29,4 +31,12 @@ uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/share/mailwizard
 	rm -rf $(DESTDIR)$(MANPREFIX)/man1/mw.1
 
-.PHONY: install uninstall
+.PHONY: release
+release:
+	pandoc README.rst -s -t man -o mw.1
+	$(eval TAGMSG="v$(shell bin/mw --version | cut -d ' ' -f 2)")
+	git tag -s $(TAGMSG) -m"$(TAGMSG)"
+	git verify-tag $(TAGMSG)
+	git push origin $(TAGMSG) --follow-tags
+
+
