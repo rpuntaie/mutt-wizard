@@ -28,8 +28,9 @@ mwmaildir="${MAILDIR:-$HOME/mail}"
 mwemailre=".\+@.\+\\..\+"
 mwshare="$prefix/share/$_MW_"
 mwmbsyncrc="$mwconfigdir/isync/mbsyncrc"
-mwgetmaildir=$mwconfigdir/getmail # POP3
+mwgetmaildir=$mwconfigdir/getmail
 mwmsmtprc="$mwconfigdir/msmtp/config"
+mwmprocmailrcdir="$mwconfigdir/procmail"
 mwsharerc="$mwshare/$_MW_.muttrc"
 mwcachedir="${XDG_CACHE_HOME:-$HOME/.cache}/$_MW_"
 
@@ -270,6 +271,11 @@ password_command = ("pass", "$mwpass")
 [destination]
 type = Maildir
 path = $mwaccmaildir/INBOX/
+
+# [destination]
+# type = MDA_external
+# path = /usr/bin/procmail
+# arguments = ('-f', '%(sender)', '-m', '$mwmprocmailrcdir/$mwaddr')
 
 [options]
 read_all = true
@@ -784,8 +790,10 @@ _mwsyncemails() {
     _mwsyncandnotify
   done
   rm $XDG_CONFIG_HOME/getmail/oldmail-* &> /dev/null
-  echo notmuch new ...
-  notmuch new &> /dev/null
+  if _mwchk notmuch ; then
+    echo notmuch new ...
+    notmuch new &> /dev/null
+  fi
 }
 
 _mwmuttemails() {
