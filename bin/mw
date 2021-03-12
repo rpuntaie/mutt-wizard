@@ -260,7 +260,7 @@ EOF
 
 # if there, one can use it via the getmail rc (see below)
 _mwprocmail() {
-    if [ ! -e $mwprocmaildir/$mwaddr ] ; then
+    if ! _mwf $mwprocmaildir/$mwaddr ; then
       mkdir -p "$mwprocmaildir"
       cat > "$mwprocmaildir/$mwaddr" <<EOF
 MAILDIR=$mwmaildir/$mwaddr
@@ -277,8 +277,9 @@ EOF
 }
 
 _mwgetmail() {
-    mkdir -p "$mwgetmaildir"
-    cat > "$mwgetmaildir/$mwaddr" <<EOF
+    if [ ! -L $mwprocmaildir/$mwaddr ] ; then
+      mkdir -p "$mwgetmaildir"
+      cat > "$mwgetmaildir/$mwaddr" <<EOF
 #directly via getmail
 #getmail --rcfile=$mwaddr --getmaildir=$mwgetmaildir
 
@@ -320,6 +321,7 @@ delete = true
 # vim: ft=conf
 
 EOF
+    fi
 }
 
 _mwprofiles() {
