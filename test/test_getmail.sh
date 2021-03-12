@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-# manual preparations: getmail/<server>.<kind>_<email>
-# e.g.
-# pass insert getmail/imap_smtp.993_puntaier.roland@gmail.com
-# pass insert getmail/mail.pops_testpops@fellowsandcarr.ca
-# pass insert getmail/mail.imaps_testimaps@fellowsandcarr.ca
-# pass insert getmail/broadstreet.pops_getmail6@webconquest.com
-# pass insert getmail/broadstreet.imaps_getmail6@webconquest.com
-
 mkportnr(){
     case $1 in
         pop)
