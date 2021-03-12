@@ -36,7 +36,7 @@ release:
 	pandoc README.rst -s -t man -o mw.1
 	$(eval TAGMSG="v$(shell bin/mw --version | cut -d ' ' -f 2)")
 	git commit -am $(TAGMSG)
-	git tag -s $(TAGMSG) -m"$(TAGMSG)"
+	git tag -f -s $(TAGMSG) -m"$(TAGMSG)"
 	git verify-tag $(TAGMSG)
 	git push origin $(TAGMSG) --follow-tags --force
 
