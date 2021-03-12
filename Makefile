@@ -38,6 +38,6 @@ release:
 	git commit -am $(TAGMSG)
 	git tag -s $(TAGMSG) -m"$(TAGMSG)"
 	git verify-tag $(TAGMSG)
-	git push origin $(TAGMSG) --follow-tags
+	git push origin $(TAGMSG) --follow-tags --force
 
 
