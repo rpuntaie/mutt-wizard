@@ -771,6 +771,7 @@ _mwgatheremails() {
   if [ -d "$mwgetmaildir" ]; then
     for gmrc in $mwgetmaildir/*; do
       [ "${gmrc#$mwgetmaildir}" = "/*" ] && break
+      [[ "${gmrc#$mwgetmaildir}" =~ /oldmail-.* ]] && continue
       store=$(sed -ne "s/^path\s*=\s*//p" $gmrc)
       store=${store/#\~/$HOME}
       if [ ! -d "$store" ]; then
