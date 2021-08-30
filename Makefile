@@ -40,4 +40,7 @@ release:
 	git verify-tag $(TAGMSG)
 	git push origin $(TAGMSG) --follow-tags --force
 
-
+.PHONY: test
+test:
+	cd test && export MWNOTMUCHNEW=1 && ./dotests
+	cd test && export MWNOTMUCHNEW=0 && ./dotests
