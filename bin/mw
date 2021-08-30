@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="2.0.5"
+VERSION="2.0.6"
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   prefix=${0}
@@ -109,6 +109,11 @@ _mwasktype() {
   return 0
 }
 
+_mwdomain(){
+  mwserverinfo="$(grep "^$mwdomain" "$mwshare/domains.csv" 2>/dev/null)"
+  [ -z "$mwserverinfo" ] && mwserverinfo="$(grep "$(echo "$mwdomain" | sed "s/\.[^\.]*$/\.\\\*/")" "$mwshare/domains.csv" 2>/dev/null)"
+}
+
 _mwaskinfo() {
   if [ -z "$mwaddr" ]; then
     printf "Type the \033[31memail address\033[0m\\n\t\033[36m"
@@ -120,21 +125,11 @@ _mwaskinfo() {
       printf "\033[0m"
     done
   fi
-  mwdomain="$(echo "$mwaddr" | sed "s/.*@//")"
+  mwdomain="${mwaddr#*@}"
   if [ -z "$mwserverinfo" ]; then
     printf "\\nSearching for \033[32m%s\033[0m in \033[34m\`domains.csv\`\033[0m..." "$mwdomain"
-    mwserverinfo="$(grep "^$mwdomain" "$mwshare/domains.csv" 2> /dev/null)"
-    if [ -z "$mwserverinfo" ]; then
-      mwsubdomain=${mwdomain%%.*}
-      if [ "$mwsubdomain" == "outlook" ] || \
-         [ "$mwsubdomain" == "yandex" ] || \
-         [ "$mwsubdomain" == "yahoo" ] || \
-         [ "$mwsubdomain" == "hotmail" ] || \
-         [ "$mwsubdomain" == "gmx" ]; then
-        mwserverinfo="$(grep "^$mwsubdomain.com" "$mwshare/domains.csv" 2> /dev/null)"
-        mwserverinfo="$mwdomain,${mwserverinfo#*,}"
-      fi
-    fi
+    _mwdomain
+    mwserverinfo="$mwdomain,${mwserverinfo#*,}"
   fi
   if [ -z "$mwserverinfo" ]; then
     printf "Your email domain is not known to $_MW_.\\nType in your settings.\\n"
