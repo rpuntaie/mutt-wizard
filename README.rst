@@ -1,5 +1,5 @@
 ==========================================
-mw(1) Version 2.0.6 \| mailwizard man page
+mw(1) Version 2.0.7 \| mailwizard man page
 ==========================================
 
 NAME

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="2.0.6"
+VERSION="2.0.7"
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   prefix=${0}
@@ -109,11 +109,6 @@ _mwasktype() {
   return 0
 }
 
-_mwdomain(){
-  mwserverinfo="$(grep "^$mwdomain" "$mwshare/domains.csv" 2>/dev/null)"
-  [ -z "$mwserverinfo" ] && mwserverinfo="$(grep "$(echo "$mwdomain" | sed "s/\.[^\.]*$/\.\\\*/")" "$mwshare/domains.csv" 2>/dev/null)"
-}
-
 _mwaskinfo() {
   if [ -z "$mwaddr" ]; then
     printf "Type the \033[31memail address\033[0m\\n\t\033[36m"
@@ -128,8 +123,9 @@ _mwaskinfo() {
   mwdomain="${mwaddr#*@}"
   if [ -z "$mwserverinfo" ]; then
     printf "\\nSearching for \033[32m%s\033[0m in \033[34m\`domains.csv\`\033[0m..." "$mwdomain"
-    _mwdomain
-    mwserverinfo="$mwdomain,${mwserverinfo#*,}"
+    mwserverinfo="$(grep "^$mwdomain" "$mwshare/domains.csv" 2>/dev/null)"
+    [ -z "$mwserverinfo" ] && mwserverinfo="$(grep "$(echo "$mwdomain" | sed "s/\.[^\.]*$/\.\\\*/")" "$mwshare/domains.csv" 2>/dev/null)"
+    [ -n "$mwserverinfo" ] && mwserverinfo="$mwdomain,${mwserverinfo#*,}"
   fi
   if [ -z "$mwserverinfo" ]; then
     printf "Your email domain is not known to $_MW_.\\nType in your settings.\\n"
