@@ -74,14 +74,19 @@ return 1
 
 _mwcheckinternet() {
   # Checks for internet connection
-  if _mwchk systemctl; then
-    if ! systemctl --type service | grep -i net | grep active > /dev/null; then
-      echo "No internet connection."
+  if _mwchk nc; then
+    if ! nc -dzw1 8.8.8.8 443; then
+      echo "No internet connection (nc)."
       return 1
     fi
-  else
+  elif _mwchk ping; then
     if ! ping -q -c 1 1.1.1.1 > /dev/null; then
-      echo "No internet connection (ping failed)."
+      echo "No internet connection (ping)."
+      return 1
+    fi
+  elif _mwchk systemctl; then
+    elif ! systemctl --type service | grep -i net | grep active > /dev/null; then
+      echo "No internet connection (systemctl)."
       return 1
     fi
   fi
