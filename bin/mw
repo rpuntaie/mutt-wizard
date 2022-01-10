@@ -285,6 +285,7 @@ server = $mwurl
 username = $mwlogin
 port = $mwport
 password_command = ("pass", "$mwpass")
+ssl_ciphers = AES256-SHA
 
 [destination]
 type = Maildir
