@@ -168,7 +168,7 @@ EOF
     printf "\033[34mThe password is only asked if you do not use getmail use_xoauth2.\033[0m\\n"
     printf "\033[34mFor use_xoauth2, now you could provide a <email>.json\033[0m\\n"
     printf "\033[34min ${mwaccmuttdir} or ${HOME}\033[0m\\n"
-    printf "\033[34mSee https://developers.google.com/identity/protocols/oauth2/native-app\033[0m\\n"
+    printf "\033[34mSee https://github.com/getmail6/getmail6/blob/master/docs/getmailrc-examples#:~:text=use_xoauth2\033[0m\\n"
     printf "\\n\tLogin(?): \033[36m"
     read -r mwlogin
     printf "\033[0m"
