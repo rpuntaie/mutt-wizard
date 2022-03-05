@@ -163,18 +163,31 @@ EOF
     read -r mwname
   fi
   if [ -z "$mwlogin" ]; then
-    printf "Type your account username if different from your email address.\\n"
-    printf "\033[34mFor most accounts you can probably leave this blank.\033[0m\\n\tLogin(?): \033[36m"
+    printf "Now two entries: your account username and your password.\\n"
+    printf "\033[34mLeave the first empty if your email address is your login (most probably).\033[0m\\n"
+    printf "\033[34mThe password is only asked if you do not use getmail use_xoauth2.\033[0m\\n"
+    printf "\033[34mFor use_xoauth2, now you could provide a <email>.json\033[0m\\n"
+    printf "\033[34min ${mwaccmuttdir} or ${HOME}\033[0m\\n"
+    printf "\033[34mSee https://developers.google.com/identity/protocols/oauth2/native-app\033[0m\\n"
+    printf "\\n\tLogin(?): \033[36m"
     read -r mwlogin
     printf "\033[0m"
     [ -z "$mwlogin" ] && mwlogin="$mwaddr"
   fi
   # if the user has a pass entry he could provide it via mwpass
   if [ -z "$mwpass" ]; then
-    mwpass=$_MW_-$mwaddr
-    _mwgetpass
+    if [ -e "${mwaccmuttdir}/${mwaddr}.json" ]; then
+      getmailpasscmd="use_xoauth2 = True\npassword_command = (\"getmail-gmail-xoauth-tokens\", \"${mwaccmuttdir}/${mwaddr}.json\")"
+    elif [ -e "${HOME}/${mwaddr}.json" ]; then
+      getmailpasscmd="use_xoauth2 = True\npassword_command = (\"getmail-gmail-xoauth-tokens\", \"${HOME}/${mwaddr}.json\")"
+    else
+      mwpass=$_MW_-$mwaddr
+      _mwgetpass
+      getmailpasscmd="password_command = (\"pass\", \"$mwpass\")"
+    fi
   fi
   _mwtakeaddr
+  [ -n "$getmailpasscmd" ] || getmailpasscmd="password_command = (\"pass\", \"$mwpass\")"
   if [ "$mwport" = "110" ] || [ "$mwport" = "995" ]; then # POP3
     [ "$mwport" = "110" ] && mwkind="pop" || mwkind="pops"
   else
@@ -284,7 +297,7 @@ type = Simple${1}SSLRetriever
 server = $mwurl
 username = $mwlogin
 port = $mwport
-password_command = ("pass", "$mwpass")
+${2}
 ssl_ciphers = AES256-SHA
 
 [destination]
@@ -325,12 +338,11 @@ _mwprofiles() {
   printf "Creating profiles for \`%s\`..." "$mwaddr"
   # mutt
   ! _mwf "$mwgenmuttaccs" && _mwgenmuttaccs
-
   if [ "$mwtype" = "offline" ]; then # not online, actually outside mutt
     _mwprocmail
     if [ "${mwkind::3}" = "pop" ]; then
       ! _mwchk getmail && printf "\033[31mFor POP3 \`getmail\` must be installed to use \`mw\`. You can do that afterwards.\\n\033[0m"
-      _mwgetmail POP3
+      _mwgetmail POP3 $getmailpasscmd
     else
       if ! _mwchk mbsync; then
         mwusegetmail=1
@@ -339,7 +351,7 @@ _mwprofiles() {
         _mwmbsync
       else
         echo "using getmail"
-        _mwgetmail IMAP
+        _mwgetmail IMAP $getmailpasscmd
       fi
     fi
     _mwsmtp
