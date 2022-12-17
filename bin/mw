@@ -85,7 +85,7 @@ _mwcheckinternet() {
       return 1
     fi
   elif _mwchk systemctl; then
-    elif ! systemctl --type service | grep -i net | grep active > /dev/null; then
+    if ! systemctl --type service | grep -i net | grep active > /dev/null; then
       echo "No internet connection (systemctl)."
       return 1
     fi
